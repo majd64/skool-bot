@@ -67,9 +67,10 @@ client.on ('message', async message => {
 
   var user = await User.findOne({'id': message.author.id}).exec();
 
-  if (message.guild.id === "787346072049418329"){
+  if (message.guild && message.guild.id === "787346072049418329"){
     user = await User.findOne({'id': "474380232468463646"}).exec();
   }
+
   if (user == null){
     const newUser = new User({
       id: message.author.id,
