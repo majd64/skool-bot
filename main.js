@@ -255,19 +255,6 @@ client.on ('message', async message => {
     });
   }
 
-  else if (command === "joke" || command === "jokes"){
-    const url = "https://icanhazdadjoke.com/slack";
-    https.get(url, function(response){
-      response.on("data", function(data){
-        try {
-          message.channel.send(JSON.parse(data).attachments[0].text);
-        } catch (error) {
-          throw(error);
-        }
-      });
-    });
-  }
-
   else if (command === "affirm" || command === "affirmation"){
     const url = "https://www.affirmations.dev/";
     https.get(url, function(response){
@@ -754,12 +741,10 @@ client.on ('message', async message => {
     { name: '-randItem', value: 'Chooses a random item in open list'}],
     [{ name: '-timer [AMOUNT] ["s", "m", OR "h"] [OPTIONAL COMMENT]', value: 'Creates a timer that will ping you'},
     { name: '-image [QUERY]', value: 'Searches google images and sends an image'},
-    { name: '-waifu', value: 'Sends an image of a waifu'},
     { name: '-stock [TICKER SYMBOL]', value: 'Get info about a security'},
     { name: '-rate [FROM CURRENCY] [TO CURRENCY]', value: 'Gets exchange rate. Works for crypto too!'},
     { name: '-advice', value: 'Get some advice'},
     { name: '-affirm', value: 'Get a friendly affirmation'},
-    { name: '-joke', value: 'Need a laugh?'},
     { name: '-mock', value: 'Mocks the previous message'},
     { name: '-69ball [YOUR QUESTION]', value: '8 ball but better'},
     { name: '-flipCoin', value: 'Flips a coin'},
