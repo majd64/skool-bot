@@ -20,7 +20,7 @@ console.log("Skule Bot is Running")
 const googleClient = new imageSearch('0fb2de5617f419fb9', 'AIzaSyBUQaXp5bZ8qdvGJ7X1hcxkYNLgtY7cT1s');
 
 var color = "";
-const prefix = "/";
+const prefix = "-";
 
 const userSchema = new mongoose.Schema({
   id: String,
