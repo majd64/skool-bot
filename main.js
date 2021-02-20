@@ -20,7 +20,7 @@ console.log("Skule Bot is Running")
 const googleClient = new imageSearch('0fb2de5617f419fb9', 'AIzaSyBUQaXp5bZ8qdvGJ7X1hcxkYNLgtY7cT1s');
 
 var color = "";
-const prefix = "-";
+const prefix = "/";
 
 const userSchema = new mongoose.Schema({
   id: String,
@@ -484,7 +484,17 @@ client.on ('message', async message => {
       return;
     }
     const listName = argsToString(args);
-    const list = getList(user.lists, listName)
+    var list = null
+    if (!isNaN(listName)){
+      listIndex = parseInt(listName)
+      if (listIndex < 1 || listIndex > user.lists.length){
+        message.channel.send("You cannot open list number " + listIndex + " because there is only " + user.lists.length + " lists");
+        return
+      }
+      list = user.lists[listIndex - 1]
+    }else{
+      list = getList(user.lists, listName)
+    }
     if (list == null) {
       message.channel.send("This list does not exist");
       return;
