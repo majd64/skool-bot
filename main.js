@@ -637,11 +637,22 @@ client.on ('message', async message => {
   }
 
   else if (command === "show" || command === "showitem" || command === "showitems" || command === "s") {
-    if (user.selectedListName == null) {
-      message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
-      return;
+    var list = null
+    if (!isNaN(args[0])){
+      let index = parseInt(args[0]) - 1
+      if (index >= 0 && index < user.lists.length){
+        list = user.lists[index]
+      }else{
+        message.channel.send("You cannot show list number " + index + " because there is only " + user.lists.length + " lists");
+        return
+      }
+    }else{
+      if (user.selectedListName == null) {
+        message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
+        return;
+      }
+      list = getList(user.lists, user.selectedListName)
     }
-    const list = getList(user.lists, user.selectedListName)
     if (list.items.length === 0) {
       message.channel.send("This list is empty. To add a new item use the following command: *" + prefix + "add file report*");
       return;
