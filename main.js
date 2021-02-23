@@ -708,7 +708,7 @@ client.on ('message', async message => {
       return;
     }
     const duckie = await User.findOne({'id': "322237285548556289"}).exec();
-    const feedbackList = getList(duckie.lists, "* ");
+    const feedbackList = getList(duckie.lists, "feedback ");
     const feedback = {
       name: argsToString(args),
       checked: false
