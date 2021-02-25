@@ -5,7 +5,7 @@ https = require('https');
 const imageSearch = require('image-search-google');
 const cheerio = require('cheerio');
 const request = require('request');
-const axios = require('axios');//
+const axios = require('axios');
 
 mongoose.connect("mongodb+srv://admin:" + process.env.ATLASPASSWORD + "@cluster0.xpbd4.mongodb.net/" + process.env.ATLASUSER, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -44,21 +44,6 @@ const User = mongoose.model("User", userSchema);
 const Data = mongoose.model("Data", dataSchema);
 
 client.on ('message', async message => {
-
- //  if (!(message.author.id === client.user.id)){
- //
- //
- //    const channel01 = client.channels.cache.find(channel => channel.id === "786450254509506572")
- //
- //   channel01.send(`**${message.author.username}** *(${message.guild.name}):*  ${message.content.replace('@','/at/')}`);
- //   return
- // }
-
- // if (message.author.id == "265294253280722955"){
- //   message.channel.send("MAYA you are a ||fucking|| SIMP")
- // }
-
-
   if (!message.content.startsWith(prefix) ) return
 
   color = getRandomColor();
@@ -67,7 +52,7 @@ client.on ('message', async message => {
 
   var user = await User.findOne({'id': message.author.id}).exec();
 
-  if (message.guild && message.guild.id === "787346072049418329"){
+  if (message.guild && message.guild.id === "787346072049418329"){//for that person
     user = await User.findOne({'id': "474380232468463646"}).exec();
   }
 
@@ -118,58 +103,6 @@ client.on ('message', async message => {
         message.channel.send(urls[Math.floor(Math.random() * urls.length) + 1])
     });
   }
-
-  // else if (command === "waifu"){
-  //   var urls = null
-  //   var waifuSearch = ""
-  //
-  //   let rand = Math.floor(Math.random() * 4) + 1
-  //   if (rand == 1){
-  //     waifuSearch = "hot anime girl"
-  //   }
-  //   else if (rand == 2){
-  //     waifuSearch = "hot waifu"
-  //   }
-  //   else if (rand == 3){
-  //     waifuSearch = "hot anime girl"
-  //   }
-  //   else if (rand == 4){
-  //     waifuSearch = "hot anime"
-  //   }
-  //   else if (rand == 5){
-  //     waifuSearch = "sexy anime girl"
-  //   }
-  //
-  //   var options = {
-  //       url: "http://results.dogpile.com/serp?qc=images&q=" + waifuSearch,
-  //       method: "GET",
-  //       headers: {
-  //          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0",
-  //          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-  //          "Accept-Language": "en-US,en;q=0.5",
-  //          "Referer": "https://www.google.com/",
-  //          "DNT": "1",
-  //          "Connection": "keep-alive",
-  //          "Upgrade-Insecure-Requests": "1"
-  //      }
-  //   };
-  //   request(options, function(error, response, responseBody) {
-  //       if (error) {
-  //           message.channel.send("An error occured")
-  //           return;
-  //       }
-  //       $ = cheerio.load(responseBody);
-  //       var links = $(".image a.link");
-  //       urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr("href"));
-  //       if (!urls.length) {
-  //         message.channel.send("No images found")
-  //         return;
-  //       }
-  //       message.channel.send(urls[Math.floor(Math.random() * urls.length) + 1])
-  //       .then(msg =>{msg.react('❤️')});
-  //
-  //   });
-  // }
 
   else if (command == "imgstatus"){
     const embed = new Discord.MessageEmbed()
@@ -677,6 +610,32 @@ client.on ('message', async message => {
     message.channel.send(itemsImbed);
   }
 
+  else if (command === "showall" || command === "all" || command === "sa") {
+    if (user.lists.length === 0) {
+      message.channel.send("You have no lists. To make a new list use the following command: *" + prefix + "newList work*");
+      return;
+    }
+    const itemsImbed = new Discord.MessageEmbed()
+  	.setColor(color)
+    user.lists.forEach((list, j) => {
+      var string = ""
+      list.items.forEach((item, i) => {
+        if (item.checked){
+          var item = (i + 1) + ")✅" + item.name + "\n";
+        }
+        else if (list.items[i].crossed){
+          var item = (i + 1) + ")❌" + item.name + "\n";
+        }
+        else{
+          var item = (i + 1) + ") " + item.name + "\n";
+        }
+        string += item;
+      });
+      itemsImbed.addField(list.name, string, true)
+    });
+    message.channel.send(itemsImbed);
+  }
+
   else if (command === "randitem" || command === "randitems" || command === "ri"){
     if (user.selectedListName == null) {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
@@ -749,6 +708,7 @@ client.on ('message', async message => {
     const fields = [[{ name: '-newList [LIST NAME]', value: 'Makes a new list'},
     { name: '-deleteList [LIST NAME]', value: 'Deletes a list'},
     { name: '-showLists', value: 'Shows all lists'},
+    { name: '-showAll', value: 'Shows all items in all lists'},
     { name: '-open [LIST NAME]', value: 'Opens a list'},
     { name: '-open', value: 'Shows open list'},
     { name: '-editListName [NEW NAME]', value: 'Edits name of open list'},
