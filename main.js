@@ -925,7 +925,7 @@ function rhodes(callback, numOfTimes){
   if (numOfTimes > 1){
     setTimeout(() => {
       rhodes(callback, numOfTimes - 1)
-    }, 1200);
+    }, 1350);
   }else{
     count = 0
   }
