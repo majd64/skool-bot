@@ -76,32 +76,15 @@ client.on ('message', async message => {
   data.save();
 
   if (command === "image" || command === "images" || command === "img"){
-    var urls = null
-    var options = {
-        url: "http://results.dogpile.com/serp?qc=images&q=" + argsToString(args),
-        method: "GET",
-        headers: {
-           "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0",
-           "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-           "Accept-Language": "en-US,en;q=0.5",
-           "Referer": "https://www.google.com/",
-           "DNT": "1",
-           "Connection": "keep-alive",
-           "Upgrade-Insecure-Requests": "1"
-       }
-    };
-    request(options, function(error, response, responseBody) {
-        if (error) {
-            return;
-        }
-        $ = cheerio.load(responseBody);
-        var links = $(".image a.link");
-        urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr("href"));
-        if (!urls.length) {
-            return;
-        }
-        message.channel.send(urls[Math.floor(Math.random() * urls.length) + 1])
-    });
+    getImage(argsToString(args), url => {
+      message.channel.send(url)
+    })
+  }
+
+  else if (command == "rhodes"){
+    rhodes((url) => {
+      message.channel.send(url)
+    }, args[0])
   }
 
   else if (command == "imgstatus"){
@@ -870,4 +853,44 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+}
+async function getImage(query, callback){
+  var urls = null
+  var options = {
+      url: "http://results.dogpile.com/serp?qc=images&q=" + query,
+      method: "GET",
+      headers: {
+         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0",
+         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+         "Accept-Language": "en-US,en;q=0.5",
+         "Referer": "https://www.google.com/",
+         "DNT": "1",
+         "Connection": "keep-alive",
+         "Upgrade-Insecure-Requests": "1"
+     }
+  };
+  request(options, function(error, response, responseBody) {
+      if (error) {
+          return;
+      }
+      $ = cheerio.load(responseBody);
+      var links = $(".image a.link");
+      urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr("href"));
+      if (!urls.length) {
+          return;
+      }
+      callback(urls[Math.floor(Math.random() * urls.length) + 1])
+  });
+}
+
+function rhodes(callback, numOfTimes){
+  console.log(numOfTimes)
+  getImage("lana rhodes gif", callback)
+  if (numOfTimes > 1){
+    setTimeout(() => {
+      rhodes(callback, numOfTimes - 1)
+    }, 1500);
+  }else{
+    count = 0
+  }
 }
