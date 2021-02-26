@@ -885,11 +885,47 @@ async function getImage(query, callback){
 
 function rhodes(callback, numOfTimes){
   console.log(numOfTimes)
-  getImage("lana rhodes gif", callback)
+  let query = ""
+  const r = Math.floor(Math.random() * 11)//0-4
+  if (r == 0){
+    query = "lana rhodes gif"
+  }
+  else if (r == 1){
+    query = "naked lana rhodes gif"
+  }
+  else if (r == 2){
+    query = "lana rhodes nude gif"
+  }
+  else if (r == 3){
+    query = "hot lana rhodes gif"
+  }
+  else if (r == 4){
+    query = "lana rhodes boobs gif"
+  }
+  else if (r == 5){
+    query = "lana rhodes hot gif"
+  }
+  else if (r == 6){
+    query = "lana rhodes porn gif"
+  }
+  else if (r == 7){
+    query = "porn gif"
+  }
+  else if (r == 8){
+    query = "sex gif"
+  }
+  else if (r == 9){
+    query = "lana rhodes sex gif"
+  }
+  else if (r == 10){
+    query = "boob reveal gif"
+  }
+
+  getImage(query, callback)
   if (numOfTimes > 1){
     setTimeout(() => {
       rhodes(callback, numOfTimes - 1)
-    }, 1500);
+    }, 1200);
   }else{
     count = 0
   }
