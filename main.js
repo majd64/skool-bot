@@ -22,6 +22,8 @@ const googleClient = new imageSearch('0fb2de5617f419fb9', 'AIzaSyBUQaXp5bZ8qdvGJ
 var color = "";
 const prefix = "-";
 
+var forceKillImages = false
+
 const userSchema = new mongoose.Schema({
   id: String,
   selectedListName: String,
@@ -76,37 +78,29 @@ client.on ('message', async message => {
   data.save();
 
   if (command === "image" || command === "images" || command === "img"){
-    getImage(argsToString(args), url => {
-      message.channel.send(url)
-    })
-  }
-  else if (command == "seica"){
-    const channel = client.channels.cache.get("713243060611317790")
-    channel.send("PLEASE SEICA DISTRIBUTE THAT LOAD LINEARLY -- message sent by     @not procrastinating#4451  (Badr)")
-    message.channel.send("done babe.")
-  }
-
-  else if (command == "rhodes"){
-    rhodes((url) => {
-      message.channel.send(url)
-    }, args[0])
-  }
-  else if (command == "imgstatus"){
-    const embed = new Discord.MessageEmbed()
-    .setColor(color)
-    var string = "Header Index: " + headerIndex + "\n" + "Until rotation: " + numSearchSinceRotation + "/30\n" + "Headers: " + JSON.stringify(headersList[headerIndex]);
-    embed.setFooter(string);
-    message.channel.send(embed)
-  }
-
-  else if (command == "forcerotation"){
-    numSearchSinceRotation = 0
-    if (headerIndex < headersList.length - 1){
-      headerIndex += 1
+    if (!isNaN(args[0])){
+      let numOfTimes = args[0]
+      if (numOfTimes > 300){
+        message.channel.send("You cannot request more than 300 images at a time.")
+        return
+      }
+      args.splice(0,1)
+      repeatImages((url) => {
+        message.channel.send(url)
+      }, numOfTimes, argsToString(args))
     }else{
-      headerIndex = 0
+      getImage(argsToString(args), url => {
+        message.channel.send(url)
+      })
     }
-    message.channel.send("Headers successfully rotated")
+  }
+
+  else if (command == "killimages"){
+    forceKillImages = true
+    message.channel.send("stopping images...")
+    setTimeout(() => {
+      forceKillImages = false
+    }, 3000);
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
@@ -887,50 +881,16 @@ async function getImage(query, callback){
   });
 }
 
-function rhodes(callback, numOfTimes){
-  console.log(numOfTimes)
-  let query = ""
-  const r = Math.floor(Math.random() * 11)//0-4
-  if (r == 0){
-    query = "lana rhodes gif"
+function repeatImages(callback, numOfTimes, query){
+  console.log(forceKillImages)
+  if (forceKillImages){
+    numOfTimes = 0
+    forceKillImages = false
   }
-  else if (r == 1){
-    query = "naked lana rhodes gif"
-  }
-  else if (r == 2){
-    query = "lana rhodes nude gif"
-  }
-  else if (r == 3){
-    query = "hot lana rhodes gif"
-  }
-  else if (r == 4){
-    query = "lana rhodes boobs gif"
-  }
-  else if (r == 5){
-    query = "lana rhodes hot gif"
-  }
-  else if (r == 6){
-    query = "lana rhodes porn gif"
-  }
-  else if (r == 7){
-    query = "porn gif"
-  }
-  else if (r == 8){
-    query = "sex gif"
-  }
-  else if (r == 9){
-    query = "lana rhodes sex gif"
-  }
-  else if (r == 10){
-    query = "boob reveal gif"
-  }
-
   getImage(query, callback)
   if (numOfTimes > 1){
     setTimeout(() => {
-      rhodes(callback, numOfTimes - 1)
+      repeatImages(callback, numOfTimes - 1, query)
     }, 1350);
-  }else{
-    count = 0
   }
 }
