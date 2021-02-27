@@ -80,13 +80,17 @@ client.on ('message', async message => {
       message.channel.send(url)
     })
   }
+  else if (command == "seica"){
+    const channel = client.channels.cache.get("713243060611317790")
+    channel.send("PLEASE SEICA DISTRIBUTE THAT LOAD LINEARLY -- message sent by     @not procrastinating#4451  (Badr)")
+    message.channel.send("done babe.")
+  }
 
   else if (command == "rhodes"){
     rhodes((url) => {
       message.channel.send(url)
     }, args[0])
   }
-
   else if (command == "imgstatus"){
     const embed = new Discord.MessageEmbed()
     .setColor(color)
@@ -614,7 +618,7 @@ client.on ('message', async message => {
         }
         string += item;
       });
-      itemsImbed.addField(list.name, string, true)
+      itemsImbed.addField(`[${j + 1}] ${list.name}`, string + "\n", true)
     });
     message.channel.send(itemsImbed);
   }
