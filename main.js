@@ -662,7 +662,7 @@ client.on ('message', async message => {
     const tipEmbed = new Discord.MessageEmbed()
     .setColor(color)
     .setTitle("Your support keeps me coding! Thank you! :)")
-    .addFields({name: "BTC", value: "1Dz51YMYbSzzirCquVHN1pehdq1kfpmR2u"}, {name: "ETH", value: "0xd611b300DaA2472862AecE56B5A02e9D45159817"}, {name: "XRP", value: "rsYX6gyfACYvGW8pDNJmnGezXacrH5vmmv"}, {name: "LTC", value: "LgnqQwS5UxTWCm8ncgPGh4XU6cgnFjAmo5"})
+    .addFields({name: "BTC", value: "1Dz51YMYbSzzirCquVHN1pehdq1kfpmR2u"}, {name: "ETH", value: "0xd611b300DaA2472862AecE56B5A02e9D45159817"}, {name: "LTC", value: "LgnqQwS5UxTWCm8ncgPGh4XU6cgnFjAmo5"})
     message.channel.send(tipEmbed)
   }
 
