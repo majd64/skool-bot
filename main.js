@@ -1,11 +1,8 @@
 const Discord = require('discord.js');
 const mongoose = require("mongoose");
 require('custom-env').env('staging');
-https = require('https');
-const imageSearch = require('image-search-google');
-const cheerio = require('cheerio');
-const request = require('request');
-const axios = require('axios');
+const util = require("./util");
+let models = require("./models");
 
 mongoose.connect("mongodb+srv://admin:" + process.env.ATLASPASSWORD + "@cluster0.xpbd4.mongodb.net/" + process.env.ATLASUSER, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -13,53 +10,22 @@ const client = new Discord.Client();
 client.login(process.env.LOGIN);
 client.once('ready', () => {
 // client.user.setUsername("Mystery engineer 2020");
-// client.user.setAvatar("https://wikiclipart.com/wp-content/uploads/2017/03/Paper-and-pencil-pencil-and-paper-clipart-free-images-3.png");
+// client.user.setAvatar("https://i.imgur.com/tQ7foyc.png");
 console.log("Skule Bot is Running")
 });
 
-const googleClient = new imageSearch('0fb2de5617f419fb9', 'AIzaSyBUQaXp5bZ8qdvGJ7X1hcxkYNLgtY7cT1s');
-
-var color = "";
 const prefix = "-";
 
-var forceKillImages = false
-
-const userSchema = new mongoose.Schema({
-  id: String,
-  selectedListName: String,
-  lists: [{
-    name: String,
-    items: [{
-      name: String,
-      checked: Boolean,
-      crossed: Boolean
-    }]
-  }]
-});
-
-const dataSchema = new mongoose.Schema({
-  numberOfCommands: Number,
-  date: String
-});
-
-const User = mongoose.model("User", userSchema);
-const Data = mongoose.model("Data", dataSchema);
-
 client.on ('message', async message => {
-  if (!message.content.startsWith(prefix) ) return
+  if (!message.content.startsWith(prefix)) return
 
-  color = getRandomColor();
+  const color = util.getRandomColor();
   const args = message.content.slice(prefix.length).split(" ");
   const command = args.shift().toLowerCase();
 
-  var user = await User.findOne({'id': message.author.id}).exec();
-
-  if (message.guild && message.guild.id === "787346072049418329"){//for that person
-    user = await User.findOne({'id': "474380232468463646"}).exec();
-  }
-
+  var user = await models.User.findOne({'id': message.author.id}).exec();
   if (user == null){
-    const newUser = new User({
+    const newUser = new models.User({
       id: message.author.id,
       selectedListName: null,
       lists: []
@@ -67,40 +33,20 @@ client.on ('message', async message => {
     user = newUser;
   }
 
-  var data = await Data.findOne({}).exec();
-  if (data == null){
-    data = new Data({
-      numberOfCommands: 0,
-      date: "Wed Oct 07 2020"
-    });
-  }
+  var data = await models.Data.findOne({}).exec();
   data.numberOfCommands += 1;
   data.save();
 
-  if (command === "image" || command === "images" || command === "img"){
-    if (!isNaN(args[0])){
-      let numOfTimes = args[0]
-      if (numOfTimes > 300){
-        message.channel.send("You cannot request more than 300 images at a time.")
-        return
-      }
-      args.splice(0,1)
-      repeatImages((url) => {
-        message.channel.send(url)
-      }, numOfTimes, argsToString(args))
-    }else{
-      getImage(argsToString(args), url => {
-        message.channel.send(url)
-      })
-    }
+  //---
+  if (message.guild && message.guild.id === "787346072049418329"){//for that person
+    user = await models.User.findOne({'id': "474380232468463646"}).exec();
   }
+  //---
 
-  else if (command == "killimages"){
-    forceKillImages = true
-    message.channel.send("stopping images...")
-    setTimeout(() => {
-      forceKillImages = false
-    }, 3000);
+  if (command === "image" || command === "images" || command === "img"){
+    util.getImage(util.argsToString(args), url => {
+      message.channel.send(url)
+    })
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
@@ -108,7 +54,7 @@ client.on ('message', async message => {
       message.channel.send("Invalid command. To report an academic offence use the following command: *" + prefix + "reportAcademicOffense Phil Swift, he stole my pencil*");
       return;
     }
-    const newArgs = argsToString(args).split(",")
+    const newArgs = util.argsToString(args).split(",")
     const name = newArgs[0];
     const reason = newArgs[1];
 
@@ -199,7 +145,7 @@ client.on ('message', async message => {
   }
 
   else if (command === "rand" || command === "random" || command === "randint"){
-    let nums = getNumbers(argsToString(args))
+    let nums = util.getNumbers(util.argsToString(args))
     if (nums.length < 2) {
       message.channel.send(Math.floor(Math.random() * 10) + 1)
       return
@@ -214,7 +160,7 @@ client.on ('message', async message => {
       message.channel.send("Invalid command. To set a timer use the following command: *" + prefix + "timer 5 min*");
       return;
     }
-    const input = processText(args[0])
+    const input = util.processText(args[0])
     let time = parseInt(input[0][0]);
     let units;
     if (input[0].length === 1){
@@ -226,7 +172,7 @@ client.on ('message', async message => {
     const validMinUnits = ["m", "mn", "min", "mins", "minute", "minutes"];
     const validHourUnits = ["h", "hr", "hour", "hours"];
     const validSecUnits = ["s", "sc", "sec", "secs", "second", "seconds"];
-    const reason = argsToString(args).replace(time, "").replace(units, "");
+    const reason = util.argsToString(args).replace(time, "").replace(units, "");
     if (isNaN(time) || time < 0 || (!validMinUnits.includes(units) && !validHourUnits.includes(units) && !validSecUnits.includes(units))) {
       message.channel.send("Invalid command. To set a timer use the following command: *" + prefix + "timer 5 min*");
       return;
@@ -314,8 +260,8 @@ client.on ('message', async message => {
       message.channel.send("Invalid command. To make a new list use the following command: *" + prefix + "newList work*");
       return;
     }
-    const listName = argsToString(args);
-    if (getList(user.lists, listName) != null) {
+    const listName = util.argsToString(args);
+    if (util.getList(user.lists, listName) != null) {
       message.channel.send("This list already exists");
       return;
     }
@@ -345,7 +291,7 @@ client.on ('message', async message => {
         return
       }
     }else{
-      list = getList(user.lists, listName)
+      list = util.getList(user.lists, util.argsToString(args))
       if (list == null) {
         message.channel.send("This list does not exists");
         return;
@@ -390,8 +336,8 @@ client.on ('message', async message => {
       return;
     }
     const oldListName = user.selectedListName;
-    const newListName = argsToString(args);
-    const list = getList(user.lists, user.selectedListName);
+    const newListName = util.argsToString(args);
+    const list = util.getList(user.lists, user.selectedListName);
     list.name = newListName;
     user.selectedListName = newListName;
     await user.save();
@@ -407,7 +353,7 @@ client.on ('message', async message => {
       }
       return;
     }
-    const listName = argsToString(args);
+    const listName = util.argsToString(args);
     var list = null
     if (!isNaN(listName)){
       listIndex = parseInt(listName)
@@ -417,7 +363,7 @@ client.on ('message', async message => {
       }
       list = user.lists[listIndex - 1]
     }else{
-      list = getList(user.lists, listName)
+      list = util.getList(user.lists, listName)
     }
     if (list == null) {
       message.channel.send("This list does not exist");
@@ -437,8 +383,8 @@ client.on ('message', async message => {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
       return;
     }
-    const list = getList(user.lists, user.selectedListName);
-    var items = argsToString(args).split("/");
+    const list = util.getList(user.lists, user.selectedListName);
+    var items = util.argsToString(args).split("/");
     for (i = 0; i < items.length; i++){
       items[i] = items[i].trim();
       const newItem = {
@@ -460,8 +406,8 @@ client.on ('message', async message => {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
       return;
     }
-    const list = getList(user.lists, user.selectedListName);
-    var itemNumber = argsToString(args).split(",");
+    const list = util.getList(user.lists, user.selectedListName);
+    var itemNumber = util.argsToString(args).split(",");
     var itemsToDelete = [];
     for (i = 0; i < itemNumber.length; i++){
       const itemIndex = parseInt(itemNumber[i]);
@@ -475,7 +421,7 @@ client.on ('message', async message => {
       }
     }
     for (i = 0; i < itemsToDelete.length; i ++){
-      const index = findWithAttr(list.items, 'name', itemsToDelete[i]);
+      const index = util.findWithAttr(list.items, 'name', itemsToDelete[i]);
       if (index > -1) {
         list.items.splice(index, 1);
       }
@@ -493,14 +439,14 @@ client.on ('message', async message => {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
       return;
     }
-    const newArgs = argsToString(args).split(",");
+    const newArgs = util.argsToString(args).split(",");
     if (!(newArgs.length === 2)){
       message.channel.send("Invalid command. To edit an item use the following command: *" + prefix + "edit 3, buy paper*");
       return;
     }
     const itemIndex = parseInt(newArgs[0]);
     const newItem = newArgs[1];
-    const list = getList(user.lists, user.selectedListName);
+    const list = util.getList(user.lists, user.selectedListName);
     if (isNaN(itemIndex) || itemIndex < 0 || itemIndex > list.items.length) {
       message.channel.send("You cannot edit item number " + itemIndex + " because there is only " + list.items.length + " items");
       return;
@@ -519,7 +465,7 @@ client.on ('message', async message => {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
       return;
     }
-    const list = getList(user.lists, user.selectedListName)
+    const list = util.getList(user.lists, user.selectedListName)
     const itemIndex = parseInt(args[0]);
     if (isNaN(itemIndex) || itemIndex < 0 || itemIndex > list.items.length) {
       message.channel.send("You cannot check off item number " + itemIndex + " because there is only " + list.items.length + " items");
@@ -544,7 +490,7 @@ client.on ('message', async message => {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
       return;
     }
-    const list = getList(user.lists, user.selectedListName)
+    const list = util.getList(user.lists, user.selectedListName)
     const itemIndex = parseInt(args[0]);
     if (isNaN(itemIndex) || itemIndex < 0 || itemIndex > list.items.length) {
       message.channel.send("You cannot cross off item number " + itemIndex + " because there is only " + list.items.length + " items");
@@ -575,7 +521,7 @@ client.on ('message', async message => {
         message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
         return;
       }
-      list = getList(user.lists, user.selectedListName)
+      list = util.getList(user.lists, user.selectedListName)
     }
     if (list.items.length === 0) {
       message.channel.send("This list is empty. To add a new item use the following command: *" + prefix + "add file report*");
@@ -641,7 +587,7 @@ client.on ('message', async message => {
       message.channel.send("You have no list open. To open a list use the following command: *" + prefix + "open work*");
       return;
     }
-    const list = getList(user.lists, user.selectedListName)
+    const list = util.getList(user.lists, user.selectedListName)
     if (list.items.length === 0) {
       message.channel.send("This list is empty. To add a new item use the following command: *" + prefix + "add file report*");
       return;
@@ -651,13 +597,13 @@ client.on ('message', async message => {
   }
 
   else if (command === "clear" || command === "clearlist" || command === "clearitem" || command === "clearitems") {
-    const list = getList(user.lists, user.selectedListName)
+    const list = util.getList(user.lists, user.selectedListName)
     list.items = [];
     await user.save();
     message.channel.send("List cleared: " + list.name);
   }
 
-  else if (command === "share"){
+  else if (command === "share" || command == "invite"){
     message.channel.send("https://discordapp.com/oauth2/authorize?client_id=758800454905233429&scope=bot&permissions=511040");
   }
 
@@ -667,9 +613,9 @@ client.on ('message', async message => {
       return;
     }
     const duckie = await User.findOne({'id': "322237285548556289"}).exec();
-    const feedbackList = getList(duckie.lists, "feedback ");
+    const feedbackList = util.getList(duckie.lists, "feedback ");
     const feedback = {
-      name: argsToString(args),
+      name: util.argsToString(args),
       checked: false
     }
     feedbackList.items.push(feedback);
@@ -704,44 +650,44 @@ client.on ('message', async message => {
 
   else if (command === "help"){
     let pageNumber = 1;
-    const maxPages = 3;
-    const fields = [[{ name: '-newList [LIST NAME]', value: 'Makes a new list'},
-    { name: '-deleteList [LIST NAME]', value: 'Deletes a list'},
-    { name: '-showLists', value: 'Shows all lists'},
-    { name: '-showAll', value: 'Shows all items in all lists'},
-    { name: '-open [LIST NAME]', value: 'Opens a list'},
-    { name: '-open', value: 'Shows open list'},
-    { name: '-editListName [NEW NAME]', value: 'Edits name of open list'},
-    { name: '-add [ITEM 1/ ITEM 2/ ...]', value: 'Adds item(s) to open list'},
-    { name: '-delete [ITEM #, ITEM #, ...]', value: 'Deletes item(s) from open list'},
-    { name: '-edit [ITEM NUMBER, NEW ITEM]', value: 'Edits an item'},
-    { name: '-check [ITEM NUMBER]', value: 'Check off an item or uncheck a checked item'},
-    { name: '-cross [ITEM NUMBER]', value: 'Crosses off an item or uncrosses a crossed item'},
-    { name: '-show', value: 'Shows all items in open list'},
-    { name: '-clear', value: 'Deletes all items in open list'},
-    { name: '-randItem', value: 'Chooses a random item in open list'}],
-    [{ name: '-timer [AMOUNT] ["s", "m", OR "h"] [OPTIONAL COMMENT]', value: 'Creates a timer that will ping you'},
-    { name: '-image [QUERY]', value: 'Searches google images and sends an image'},
-    { name: '-stock [TICKER SYMBOL]', value: 'Get info about a security'},
-    { name: '-rate [FROM CURRENCY] [TO CURRENCY]', value: 'Gets exchange rate. Works for crypto too!'},
-    { name: '-advice', value: 'Get some advice'},
-    { name: '-affirm', value: 'Get a friendly affirmation'},
-    { name: '-mock', value: 'Mocks the previous message'},
-    { name: '-69ball [YOUR QUESTION]', value: '8 ball but better'},
-    { name: '-flipCoin', value: 'Flips a coin'},
-    { name: '-rollDice', value: 'Rolls a dice'},
-    { name: '-random [MIN]-[MAX]', value: 'Returns a random number. Min and max inclusive'},
-    { name: '-reportAcademicOffense [NAME OF OFFENDER], [REASON]', value: 'Reports academic offence to the dean'}],
-    [{ name: '-share', value: 'Shows invite link'},
-    { name: '-feedback [YOUR FEEDBACK]', value: 'Found a bug, have an idea suggestion or feedback?'},
-    { name: '-tip', value: 'Support the dev :)'},
-    { name: '-ping', value: 'Shows ping'},
-    { name: '-storage', value: 'Shows percentage of storage used in db'},
-    { name: '-commands', value: 'Shows total number of commands run'}]]
+    const maxPages = 5;
+    const fields = [[{ name: '-newList [LIST NAME]', value: 'Makes a new list', inline: false},
+    { name: '-deleteList [LIST NAME or LIST #]', value: 'Deletes a list', inline: false},
+    { name: '-showLists', value: 'Shows all lists', inline: false},
+    { name: '-open [LIST NAME or LIST #]', value: 'Opens a list', inline: false},
+    { name: '-open', value: 'Shows open list', inline: false},
+    { name: '-add [ITEM 1/ ITEM 2/ ...]', value: 'Adds item(s) to open list', inline: false},
+    { name: '-delete [ITEM #, ITEM #, ...]', value: 'Deletes item(s) from open list', inline: false},
+    { name: '-show', value: 'Shows all items in open list', inline: false}],
+    [{ name: '-showAll', value: 'shows all lists & all items', inline: false},
+    { name: '-editListName [NEW NAME]', value: 'Edits name of open list', inline: false},
+    { name: '-edit [ITEM NUMBER, NEW ITEM]', value: 'Edits an item', inline: false},
+    { name: '-check [ITEM NUMBER]', value: 'Check or unchecks an item', inline: false},
+    { name: '-cross [ITEM NUMBER]', value: 'Crosses or uncrosses an item', inline: false},
+    { name: '-clear', value: 'Deletes all items in open list', inline: false},
+    { name: '-randItem', value: 'Chooses a random item in open list', inline: false}],
+    [{ name: '-timer [AMOUNT] ["s", "m", OR "h"] [OPTIONAL COMMENT]', value: 'Creates a timer that will ping you', inline: false},
+    { name: '-image [QUERY]', value: 'Searches google images and sends an image', inline: false},
+    { name: '-stock [TICKER SYMBOL]', value: 'Get info about a security', inline: false},
+    { name: '-rate [FROM CURRENCY] [TO CURRENCY]', value: 'Gets exchange rate. Works for crypto too!', inline: false},
+    { name: '-mock', value: 'Mocks the previous message', inline: false},
+    { name: '-69ball [YOUR QUESTION]', value: '8 ball but better', inline: false}],
+    [{ name: '-advice', value: 'Get some advice', inline: false},
+    { name: '-affirm', value: 'Get a friendly affirmation', inline: false},
+    { name: '-flipCoin', value: 'Flips a coin', inline: false},
+    { name: '-rollDice', value: 'Rolls a dice', inline: false},
+    { name: '-random [MIN]-[MAX]', value: 'Returns a random number. Min and max inclusive', inline: false},
+    { name: '-reportAcademicOffense [NAME OF OFFENDER], [REASON]', value: 'Reports academic offence to the dean', inline: false}],
+    [{ name: '-share', value: 'Shows invite link', inline: false},
+    { name: '-feedback [YOUR FEEDBACK]', value: 'Found a bug, have an idea suggestion or feedback?', inline: false},
+    { name: '-tip', value: 'Support the dev :)', inline: false},
+    { name: '-ping', value: 'Shows ping', inline: false},
+    { name: '-storage', value: 'Shows percentage of storage used in db', inline: false},
+    { name: '-commands', value: 'Shows total number of commands run', inline: false}]]
 
     const helpEmbed = new Discord.MessageEmbed()
     .setColor(color)
-    .setTitle("Todo List Commands")
+    .setTitle("Todo List Commands 1/5")
     .setFooter('© Skool Bot | By Majd Hailat', client.user.avatarURL());
 
     helpEmbed.fields = fields[pageNumber - 1]
@@ -768,16 +714,14 @@ client.on ('message', async message => {
         });
 
         function setepEmbed(){
-          if (pageNumber === 1){
-            helpEmbed.setTitle("Todo List Commands")
+          if (pageNumber === 1 || pageNumber === 2){
+            helpEmbed.setTitle(`Todo List Commands ${pageNumber}/${maxPages}`)
           }
-          else if (pageNumber === 2){
-            helpEmbed.setTitle("Utility Commands")
+          else if (pageNumber === 3 || pageNumber == 4){
+            helpEmbed.setTitle(`Utility Commands ${pageNumber}/${maxPages}`)
           }
-          else if (pageNumber === 3){
-            helpEmbed.setTitle("Other Commands")
-          }else{
-            helpEmbed.setTitle("")
+          else if (pageNumber === 5){
+            helpEmbed.setTitle(`Other Commands ${pageNumber}/${maxPages}`)
           }
 
           helpEmbed.fields = fields[pageNumber - 1]
@@ -791,125 +735,3 @@ client.on ('message', async message => {
     message.channel.send("Invalid command use " + prefix + "help for help");
   }
 });
-
-function getList(lists, name){
-  var list = lists.filter(list => {
-    return list.name.toLowerCase() === name.toLowerCase()
-  })
-  if (list.length >= 1){
-    return list[0];
-  }else{
-    return null;
-  }
-}
-
-function argsToString(array) {
-  var string = "";
-  for (i = 0; i < array.length; i++) {
-    string += array[i] + " ";
-  }
-  return string;
-}
-
-function findWithAttr(array, attr, value) {
-    for(var i = 0; i < array.length; i += 1) {
-        if(array[i][attr] === value) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-function processText(inputText) {
-    var output = [];
-    var json = inputText.split(' ');
-    json.forEach(function (item) {
-        output.push(item.replace(/\'/g, '').split(/(\d+)/).filter(Boolean));
-    });
-    return output;
-}
-
-function getNumbers(inputText) {
-  let chars = inputText.toLowerCase().split('');
-  var numbers = []
-  var currentNumber = ""
-  for (var i = 0; i < chars.length; i++){
-    let item = chars[i]
-    if ((!isNaN(item) || (!currentNumber.includes(".") && item === ".") || (currentNumber.length === 0 && item === "-"))&& item != " "){
-      currentNumber += item
-    }
-    else{
-      if (currentNumber.length != 0){
-        if (!isNaN(currentNumber)){
-          numbers.push(parseInt(currentNumber))
-        }
-      }
-      currentNumber = ""
-    }
-    if (item === "e"){
-      numbers.push(Math.E);
-    }
-    else if (item === "p"){
-      if (chars[i + 1] === "i"){
-        numbers.push(Math.PI)
-      }
-    }
-    if (i == chars.length - 1 && currentNumber.length != 0){
-      if (!isNaN(currentNumber)){
-        numbers.push(parseInt(currentNumber))
-      }
-    }
-  }
-  return numbers
-}
-
-function getRandomColor() {
-  var letters = '0123456789ABCDEF';
-  var color = '#';
-  for (var i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
-async function getImage(query, callback){
-  var urls = null
-  var options = {
-      url: "http://results.dogpile.com/serp?qc=images&q=" + query,
-      method: "GET",
-      headers: {
-         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0",
-         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-         "Accept-Language": "en-US,en;q=0.5",
-         "Referer": "https://www.google.com/",
-         "DNT": "1",
-         "Connection": "keep-alive",
-         "Upgrade-Insecure-Requests": "1"
-     }
-  };
-  request(options, function(error, response, responseBody) {
-      if (error) {
-          return;
-      }
-      $ = cheerio.load(responseBody);
-      var links = $(".image a.link");
-      urls = new Array(links.length).fill(0).map((v, i) => links.eq(i).attr("href"));
-      if (!urls.length) {
-          return;
-      }
-      callback(urls[Math.floor(Math.random() * urls.length) + 1])
-  });
-}
-
-function repeatImages(callback, numOfTimes, query){
-  console.log(forceKillImages)
-  if (forceKillImages){
-    numOfTimes = 0
-    forceKillImages = false
-  }
-  getImage(query, callback)
-  if (numOfTimes > 1){
-    setTimeout(() => {
-      repeatImages(callback, numOfTimes - 1, query)
-    }, 1350);
-  }
-}
