@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 require('custom-env').env('staging');
 const util = require("./util");
 let models = require("./models");
+const https = require('https');
 
 mongoose.connect("mongodb+srv://admin:" + process.env.ATLASPASSWORD + "@cluster0.xpbd4.mongodb.net/" + process.env.ATLASUSER, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -100,19 +101,6 @@ client.on ('message', async message => {
     }
     const responses = ["Fuck yes!", "Of course", "mhmmm", "Yes ma'am", "YESSS!", "yea", "As I see it, yes", "Yup", "Yes, deffinitley", "Fuck no!", "Hello no!", "Of course not!", "no.", "Simply no", "Busy!", "Leave me alone", "Sorry, my uhh, server is slow", "I don't feel like responding tbh"]
     message.channel.send(responses[Math.floor(Math.random() * responses.length)]);
-  }
-
-  else if (command === "advice"){
-    const url = "https://api.adviceslip.com/advice";
-    https.get(url, function(response){
-      response.on("data", function(data){
-        try{
-          message.channel.send(JSON.parse(data).slip.advice);
-        }catch (error) {
-          throw(error);
-        }
-      });
-    });
   }
 
   else if (command === "affirm" || command === "affirmation"){
@@ -641,13 +629,6 @@ client.on ('message', async message => {
     });
   }
 
-  else if (command === "storage"){
-    User.collection.stats(function(err, results) {
-      const p = Number.parseFloat(((results.storageSize/1000)/512000) * 100).toPrecision(3);
-      message.channel.send( p + "% used of total storage")
-    });
-  }
-
   else if (command === "help"){
     let pageNumber = 1;
     const maxPages = 5;
@@ -672,8 +653,7 @@ client.on ('message', async message => {
     { name: '-rate [FROM CURRENCY] [TO CURRENCY]', value: 'Gets exchange rate. Works for crypto too!', inline: false},
     { name: '-mock', value: 'Mocks the previous message', inline: false},
     { name: '-69ball [YOUR QUESTION]', value: '8 ball but better', inline: false}],
-    [{ name: '-advice', value: 'Get some advice', inline: false},
-    { name: '-affirm', value: 'Get a friendly affirmation', inline: false},
+    [{ name: '-affirm', value: 'Get a friendly affirmation', inline: false},
     { name: '-flipCoin', value: 'Flips a coin', inline: false},
     { name: '-rollDice', value: 'Rolls a dice', inline: false},
     { name: '-random [MIN]-[MAX]', value: 'Returns a random number. Min and max inclusive', inline: false},
@@ -682,7 +662,6 @@ client.on ('message', async message => {
     { name: '-feedback [YOUR FEEDBACK]', value: 'Found a bug, have an idea suggestion or feedback?', inline: false},
     { name: '-tip', value: 'Support the dev :)', inline: false},
     { name: '-ping', value: 'Shows ping', inline: false},
-    { name: '-storage', value: 'Shows percentage of storage used in db', inline: false},
     { name: '-commands', value: 'Shows total number of commands run', inline: false}]]
 
     const helpEmbed = new Discord.MessageEmbed()

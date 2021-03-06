@@ -38,3 +38,23 @@
 //     })
 //   }
 // }
+
+// else if (command === "advice"){
+//   const url = "https://api.adviceslip.com/advice";
+//   https.get(url, function(response){
+//     response.on("data", function(data){
+//       try{
+//         message.channel.send(JSON.parse(data).slip.advice);
+//       }catch (error) {
+//         throw(error);
+//       }
+//     });
+//   });
+// }
+
+// else if (command === "storage"){
+//   User.collection.stats(function(err, results) {
+//     const p = Number.parseFloat(((results.storageSize/1000)/512000) * 100).toPrecision(3);
+//     message.channel.send( p + "% used of total storage")
+//   });
+// }
