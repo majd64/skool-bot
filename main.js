@@ -335,11 +335,21 @@ client.on ('message', async message => {
       message.channel.send("Invalid command. To delete a list use the following command: *" + prefix + "deleteList work*");
       return;
     }
-    const listName = argsToString(args)
-    const list = getList(user.lists, listName)
-    if (list == null) {
-      message.channel.send("This list does not exists");
-      return;
+    var list = null;
+    if (!isNaN(args[0])){
+      let index = parseInt(args[0]) - 1
+      if (index >= 0 && index < user.lists.length){
+        list = user.lists[index]
+      }else{
+        message.channel.send("You cannot delete number " + (index + 1) + " because there is only " + user.lists.length + " lists");
+        return
+      }
+    }else{
+      list = getList(user.lists, listName)
+      if (list == null) {
+        message.channel.send("This list does not exists");
+        return;
+      }
     }
     if (user.selectedListName == list.name) {
       user.selectedListName = null;
@@ -347,7 +357,7 @@ client.on ('message', async message => {
     const index = user.lists.indexOf(list);
     user.lists.splice(index, 1);
     await user.save();
-    message.channel.send("List deleted: " + listName)
+    message.channel.send("List deleted: " + list.name)
   }
 
   else if (command === "showlists" || command === "showlist" || command === "sl" || command === "lists") {
@@ -402,7 +412,7 @@ client.on ('message', async message => {
     if (!isNaN(listName)){
       listIndex = parseInt(listName)
       if (listIndex < 1 || listIndex > user.lists.length){
-        message.channel.send("You cannot open list number " + listIndex + " because there is only " + user.lists.length + " lists");
+        message.channel.send("You cannot open list number " + (listIndex + 1) + " because there is only " + user.lists.length + " lists");
         return
       }
       list = user.lists[listIndex - 1]
@@ -557,7 +567,7 @@ client.on ('message', async message => {
       if (index >= 0 && index < user.lists.length){
         list = user.lists[index]
       }else{
-        message.channel.send("You cannot show list number " + index + " because there is only " + user.lists.length + " lists");
+        message.channel.send("You cannot show list number " + (index + 1) + " because there is only " + user.lists.length + " lists");
         return
       }
     }else{
@@ -571,9 +581,10 @@ client.on ('message', async message => {
       message.channel.send("This list is empty. To add a new item use the following command: *" + prefix + "add file report*");
       return;
     }
+    const listNumber = user.lists.indexOf(list) + 1;
     const itemsImbed = new Discord.MessageEmbed()
   	.setColor(color)
-    .setTitle(list.name)
+    .setTitle(`[${listNumber}] ${list.name}`)
     var string = ""
     for (i = 0; i < list.items.length; i++) {
       if (list.items[i].checked){
@@ -596,10 +607,13 @@ client.on ('message', async message => {
       message.channel.send("You have no lists. To make a new list use the following command: *" + prefix + "newList work*");
       return;
     }
-    const itemsImbed = new Discord.MessageEmbed()
+    var itemsImbed = new Discord.MessageEmbed()
   	.setColor(color)
     user.lists.forEach((list, j) => {
       var string = ""
+      if (list.items.length == 0){
+        string = "--"
+      }
       list.items.forEach((item, i) => {
         if (item.checked){
           var item = (i + 1) + ")✅" + item.name + "\n";
@@ -612,7 +626,12 @@ client.on ('message', async message => {
         }
         string += item;
       });
-      itemsImbed.addField(`[${j + 1}] ${list.name}`, string + "\n", true)
+      itemsImbed.addField(`[${j + 1}] ${list.name}`, string + "\n", true);
+      if(itemsImbed.fields.length === 25){
+        message.channel.send(itemsImbed);
+        itemsImbed = new Discord.MessageEmbed()
+        .setColor(color);
+      }
     });
     message.channel.send(itemsImbed);
   }
