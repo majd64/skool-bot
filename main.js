@@ -4,6 +4,7 @@ require('custom-env').env('staging');
 const util = require("./util");
 let models = require("./models");
 const https = require('https');
+const math = require("mathjs");
 
 mongoose.connect("mongodb+srv://admin:" + process.env.ATLASPASSWORD + "@cluster0.xpbd4.mongodb.net/" + process.env.ATLASUSER, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -92,6 +93,15 @@ client.on ('message', async message => {
       message.channel.send(str);
     })
     .catch(console.error);
+  }
+
+  else if (command === "math" || command === "maths" || command === "eval" || command === "evaluate" || command === "compute"){
+    try{
+      const res = math.evaluate(util.argsToString(args));
+      message.channel.send(res);
+    }catch(error){
+      message.channel.send(error.message);
+    }
   }
 
   else if (command === "69ball"){
@@ -649,6 +659,7 @@ client.on ('message', async message => {
     { name: '-randItem', value: 'Chooses a random item in open list', inline: false}],
     [{ name: '-timer [AMOUNT] ["s", "m", OR "h"] [OPTIONAL COMMENT]', value: 'Creates a timer that will ping you', inline: false},
     { name: '-image [QUERY]', value: 'Searches google images and sends an image', inline: false},
+    { name: '-eval [MATH EXPRESSION]', value: 'Evaluates a math expression', inline: false},
     { name: '-stock [TICKER SYMBOL]', value: 'Get info about a security', inline: false},
     { name: '-rate [FROM CURRENCY] [TO CURRENCY]', value: 'Gets exchange rate. Works for crypto too!', inline: false},
     { name: '-mock', value: 'Mocks the previous message', inline: false},
