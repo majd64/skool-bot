@@ -320,7 +320,7 @@ client.on ('message', async message => {
     message.channel.send(listsEmbed);
   }
 
-  else if (command === "editlistname" || command === "editlistsname" || command === "editlistnames" || command === "editlistsnames"){
+  else if (command === "el" || command === "editlist" || command === "editlists" || command === "editlistname" || command === "editlistsname" || command === "editlistnames" || command === "editlistsnames"){
     if (user.lists.length === 0) {
       message.channel.send("You have no lists. To make a new list use the following command: *" + prefix + "newList work*");
       return;
@@ -674,7 +674,7 @@ client.on ('message', async message => {
     { name: '-delete [ITEM #, ITEM #, ...]', value: 'Deletes item(s) from open list', inline: false},
     { name: '-show', value: 'Shows all items in open list', inline: false}],
     [{ name: '-showAll', value: 'shows all lists & all items', inline: false},
-    { name: '-editListName [NEW NAME]', value: 'Edits name of open list', inline: false},
+    { name: '-editList [NEW NAME]', value: 'Edits name of open list', inline: false},
     { name: '-edit [ITEM NUMBER, NEW ITEM]', value: 'Edits an item', inline: false},
     { name: '-check [ITEM NUMBER]', value: 'Check or unchecks an item', inline: false},
     { name: '-cross [ITEM NUMBER]', value: 'Crosses or uncrosses an item', inline: false},
@@ -702,7 +702,7 @@ client.on ('message', async message => {
     const helpEmbed = new Discord.MessageEmbed()
     .setColor(color)
     .setTitle("Todo List Commands 1/5")
-    .setFooter('© Skool Bot | By Majd Hailat', client.user.avatarURL());
+    .setFooter('Skool Bot is not case sensetive\n© Skool Bot | By Majd Hailat', client.user.avatarURL());
 
     helpEmbed.fields = fields[pageNumber - 1]
 
