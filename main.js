@@ -605,6 +605,29 @@ client.on ('message', async message => {
     message.channel.send("https://discordapp.com/oauth2/authorize?client_id=758800454905233429&scope=bot&permissions=511040");
   }
 
+  else if (command === "swaplist" || command === 'swaplists' || command === "sl" || command === "switchlist" || command === "switchlists" || command === "switch" || command === "swap"){
+    const listNums = util.getNumbers(util.argsToString(args))
+    if (listNums.length >= 2){
+      if (listNums[0] < 1 || listNums[0] > user.lists.length || listNums[1] < 1 || listNums[1] > user.lists.length){
+        message.channel.send("You cannot swap list numbers " + listNums[0] + " and " + listNums[1] + " because there is only " + user.lists.length + " lists");
+      }else{
+        try{
+          const list1 = JSON.parse(JSON.stringify(user.lists[listNums[0] - 1]));
+          const list2 = JSON.parse(JSON.stringify(user.lists[listNums[1] - 1]));
+
+          user.lists[listNums[0] - 1] = list2;
+          user.lists[listNums[1] - 1] = list1;
+          await user.save();
+          message.channel.send ("Swapped lists")
+        }catch(err){
+          message.channel.send("Invalid command. To swap lists use the following command: *" + prefix + "swapLists 3 5*");
+        }
+      }
+    }else{
+      message.channel.send("Invalid command. To swap lists use the following command: *" + prefix + "swapLists 3 5*");
+    }
+  }
+
   else if (command === "feedback"){
     if (args.length < 1) {
       message.channel.send("Invalid command. To send feedback use the following command: *" + prefix + "feedback your bot sucks*");
@@ -656,6 +679,7 @@ client.on ('message', async message => {
     { name: '-check [ITEM NUMBER]', value: 'Check or unchecks an item', inline: false},
     { name: '-cross [ITEM NUMBER]', value: 'Crosses or uncrosses an item', inline: false},
     { name: '-clear', value: 'Deletes all items in open list', inline: false},
+    { name: '-swaplists [LIST #] [LIST #]', value: 'Swaps the position of 2 lists', inline: false},
     { name: '-randItem', value: 'Chooses a random item in open list', inline: false}],
     [{ name: '-timer [AMOUNT] ["s", "m", OR "h"] [OPTIONAL COMMENT]', value: 'Creates a timer that will ping you', inline: false},
     { name: '-image [QUERY]', value: 'Searches google images and sends an image', inline: false},

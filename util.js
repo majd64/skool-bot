@@ -80,6 +80,7 @@ function getRandomColor() {
   }
   return color;
 }
+
 async function getImage(query, callback){
   var urls = null
   var options = {
