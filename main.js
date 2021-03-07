@@ -679,7 +679,7 @@ client.on ('message', async message => {
     { name: '-check [ITEM NUMBER]', value: 'Check or unchecks an item', inline: false},
     { name: '-cross [ITEM NUMBER]', value: 'Crosses or uncrosses an item', inline: false},
     { name: '-clear', value: 'Deletes all items in open list', inline: false},
-    { name: '-swaplists [LIST #] [LIST #]', value: 'Swaps the position of 2 lists', inline: false},
+    { name: '-swap [LIST #] [LIST #]', value: 'Swaps the position of 2 lists', inline: false},
     { name: '-randItem', value: 'Chooses a random item in open list', inline: false}],
     [{ name: '-timer [AMOUNT] ["s", "m", OR "h"] [OPTIONAL COMMENT]', value: 'Creates a timer that will ping you', inline: false},
     { name: '-image [QUERY]', value: 'Searches google images and sends an image', inline: false},
