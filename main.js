@@ -36,7 +36,8 @@ client.on ('message', async message => {
   }
 
   function pingDana(){
-    client.channels.cache.get("713243060611317790").send(`<@839571494065143829>`)
+    client.channels.cache.get("713243060611317790").send(`<@839571494065143829> <@527599873965686805> <@459441540654432277>`)
+
   }
 
   var data = await models.Data.findOne({}).exec();
@@ -56,7 +57,7 @@ client.on ('message', async message => {
   }
 
   else if (command === "dana"){
-    setInterval( pingDana , 4000 )
+    setInterval( pingDana , 10000 )
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
