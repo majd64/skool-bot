@@ -35,6 +35,10 @@ client.on ('message', async message => {
     user = newUser;
   }
 
+  function pingDana(){
+    client.channels.cache.get("713243060611317790").send(`<@839571494065143829>`)
+  }
+
   var data = await models.Data.findOne({}).exec();
   data.numberOfCommands += 1;
   data.save();
@@ -49,6 +53,10 @@ client.on ('message', async message => {
     util.getImage(util.argsToString(args), url => {
       message.channel.send(url)
     })
+  }
+
+  else if (command === "dana"){
+    setInterval( pingDana , 4000 )
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
