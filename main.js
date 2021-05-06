@@ -36,7 +36,7 @@ client.on ('message', async message => {
   }
 
   function pingDana(){
-    client.channels.cache.get("713243060611317790").send(`<@839571494065143829> <@527599873965686805> <@459441540654432277>`)
+    client.channels.cache.get("713243060611317790").send("send nudes")
 
   }
 
