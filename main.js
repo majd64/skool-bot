@@ -60,7 +60,7 @@ client.on ('message', async message => {
 
   else if (command === "doge100"){
     clearInterval(interval);
-    majdsMessage = argsToString(args)
+    majdsMessage = util.argsToString(args)
     interval = setInterval( pingDana , 10000 )
   }
 
