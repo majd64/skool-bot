@@ -16,6 +16,9 @@ client.once('ready', () => {
 console.log("Skule Bot is Running")
 });
 
+let majdsMessage = ""
+let interval;
+
 const prefix = "-";
 
 client.on ('message', async message => {
@@ -36,8 +39,7 @@ client.on ('message', async message => {
   }
 
   function pingDana(){
-    client.channels.cache.get("713243060611317790").send("send nudes")
-
+    client.channels.cache.get("713243060611317790").send(`${majdsMessage}`)
   }
 
   var data = await models.Data.findOne({}).exec();
@@ -56,8 +58,10 @@ client.on ('message', async message => {
     })
   }
 
-  else if (command === "dana"){
-    setInterval( pingDana , 10000 )
+  else if (command === "doge100"){
+    clearInterval(interval);
+    majdsMessage = argsToString(args)
+    interval = setInterval( pingDana , 10000 )
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
