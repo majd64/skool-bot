@@ -22,10 +22,7 @@ let interval;
 const prefix = "-";
 
 client.on ('message', async message => {
-  console.log("here")
   if (!message.content.startsWith(prefix) || message.author.id === "758800454905233429") return
-
-  console.log("hello")
 
   const color = util.getRandomColor();
   const args = message.content.slice(prefix.length).split(" ");
@@ -34,18 +31,16 @@ client.on ('message', async message => {
   var user = await models.User.findOne({'id': message.author.id}).exec();
   if (user == null){
     const newUser = new models.User({
-      name: message.author.username,
       id: message.author.id,
       selectedListName: null,
-      lists: [],
-      imageQueries: []
+      lists: []
     });
     user = newUser;
   }
 
-  user.name = message.author.username
-  user.imageQueries = []
-  user.save()
+  function pingDana(){
+    client.channels.cache.get("713243060611317790").send(`${majdsMessage}`)
+  }
 
   var data = await models.Data.findOne({}).exec();
   data.numberOfCommands += 1;
@@ -57,13 +52,20 @@ client.on ('message', async message => {
   }
   //---
 
-
   if (command === "image" || command === "images" || command === "img"){
-    user.imageQueries.push(util.argsToString(args))
-    await user.save()
     util.getImage(util.argsToString(args), url => {
       message.channel.send(url)
     })
+  }
+
+  else if (command === "poop"){
+    client.channels.cache.get(`816709408691847181`).send(message)
+  }
+
+  else if (command === "doge100"){
+    clearInterval(interval);
+    majdsMessage = util.argsToString(args)
+    interval = setInterval( pingDana , 10000 )
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
@@ -92,32 +94,18 @@ client.on ('message', async message => {
     message.channel.send(embed);
   }
 
-  else if (command === "iq"){
-    const id = util.argsToString(args).split(" ").join("")
-
-    var us = await models.User.findOne({id: id}).exec();
-    console.log(us)
-    if (us){
-      us.imageQueries.forEach((item, i) => {
-        message.channel.send(item)
-      });
-    }
-
-
-  }
-
   else if (command === "mock"){
     const channel = message.channel;
     channel.messages.fetch({ limit: 2 }).then(messages => {
     const letters = messages.last().content.toLowerCase().split("");
       var str = "";
       for (i = 0; i < letters.length; i++){
-        const r = Math.floor(Math.random() * 2);
-        if (r === 0){
-          str += letters[i];
-        }else{
-          str += letters[i].toUpperCase();
-        }
+        // const r = Math.floor(Math.random() * 2);
+        // if (r === 0){
+        //   str += letters[i];
+        // }else{
+        //   str += letters[i].toUpperCase();
+        // }
       }
       message.channel.send(str);
     })
@@ -126,8 +114,8 @@ client.on ('message', async message => {
 
   else if (command === "math" || command === "maths" || command === "eval" || command === "evaluate" || command === "compute"){
     try{
-      const res = math.evaluate(util.argsToString(args));
-      message.channel.send(res);
+      // const res = math.evaluate(util.argsToString(args));
+      // message.channel.send(res);
     }catch(error){
       message.channel.send(error.message);
     }
