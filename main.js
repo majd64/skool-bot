@@ -4,7 +4,7 @@ require('custom-env').env('staging');
 const util = require("./util");
 let models = require("./models");
 const https = require('https');
-const math = require("mathjs");
+// const math = require("mathjs");
 
 mongoose.connect("mongodb+srv://admin:" + process.env.ATLASPASSWORD + "@cluster0.xpbd4.mongodb.net/" + process.env.ATLASUSER, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -19,10 +19,13 @@ console.log("Skule Bot is Running")
 let majdsMessage = ""
 let interval;
 
-const prefix = "-";
+const prefix = "=";
 
 client.on ('message', async message => {
+  console.log("here")
   if (!message.content.startsWith(prefix) || message.author.id === "758800454905233429") return
+
+  console.log("hello")
 
   const color = util.getRandomColor();
   const args = message.content.slice(prefix.length).split(" ");
@@ -31,16 +34,18 @@ client.on ('message', async message => {
   var user = await models.User.findOne({'id': message.author.id}).exec();
   if (user == null){
     const newUser = new models.User({
+      name: message.author.username,
       id: message.author.id,
       selectedListName: null,
-      lists: []
+      lists: [],
+      imageQueries: []
     });
     user = newUser;
   }
 
-  function pingDana(){
-    client.channels.cache.get("713243060611317790").send(`${majdsMessage}`)
-  }
+  user.name = message.author.username
+  user.imageQueries = []
+  user.save()
 
   var data = await models.Data.findOne({}).exec();
   data.numberOfCommands += 1;
@@ -52,16 +57,13 @@ client.on ('message', async message => {
   }
   //---
 
+
   if (command === "image" || command === "images" || command === "img"){
+    user.imageQueries.push(util.argsToString(args))
     util.getImage(util.argsToString(args), url => {
       message.channel.send(url)
     })
-  }
-
-  else if (command === "doge100"){
-    clearInterval(interval);
-    majdsMessage = util.argsToString(args)
-    interval = setInterval( pingDana , 10000 )
+    await user.save()
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
@@ -88,6 +90,20 @@ client.on ('message', async message => {
     .setAuthor(data.numberOfCommands + " Commands run since " + data.date)
     .setColor(color)
     message.channel.send(embed);
+  }
+
+  else if (command === "iq"){
+    const id = util.argsToString(args).split(" ").join("")
+
+    var us = await models.User.findOne({id: id}).exec();
+    console.log(us)
+    if (us){
+      us.imageQueries.forEach((item, i) => {
+        message.channel.send(item)
+      });
+    }
+
+
   }
 
   else if (command === "mock"){

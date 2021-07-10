@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+  username: String,
   id: String,
   selectedListName: String,
   lists: [{
@@ -10,7 +11,8 @@ const userSchema = new mongoose.Schema({
       checked: Boolean,
       crossed: Boolean
     }]
-  }]
+  }],
+  imageQueries: [String]
 });
 
 const dataSchema = new mongoose.Schema({
