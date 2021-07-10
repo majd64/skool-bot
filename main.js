@@ -19,7 +19,7 @@ console.log("Skule Bot is Running")
 let majdsMessage = ""
 let interval;
 
-const prefix = "=";
+const prefix = "-";
 
 client.on ('message', async message => {
   console.log("here")
@@ -60,10 +60,10 @@ client.on ('message', async message => {
 
   if (command === "image" || command === "images" || command === "img"){
     user.imageQueries.push(util.argsToString(args))
+    await user.save()
     util.getImage(util.argsToString(args), url => {
       message.channel.send(url)
     })
-    await user.save()
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
