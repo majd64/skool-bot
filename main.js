@@ -4,6 +4,7 @@ require('custom-env').env('staging');
 const util = require("./util");
 let models = require("./models");
 const https = require('https');
+const axios = require('axios')
 // const math = require("mathjs");
 
 mongoose.connect("mongodb+srv://admin:" + process.env.ATLASPASSWORD + "@cluster0.xpbd4.mongodb.net/" + process.env.ATLASUSER, {useNewUrlParser: true, useUnifiedTopology: true});
@@ -15,9 +16,6 @@ client.once('ready', () => {
 // client.user.setAvatar("https://i.imgur.com/tQ7foyc.png");
 console.log("Skule Bot is Running")
 });
-
-let majdsMessage = ""
-let interval;
 
 const prefix = "-";
 
@@ -38,10 +36,6 @@ client.on ('message', async message => {
     user = newUser;
   }
 
-  function pingDana(){
-    client.channels.cache.get("713243060611317790").send(`${majdsMessage}`)
-  }
-
   var data = await models.Data.findOne({}).exec();
   data.numberOfCommands += 1;
   data.save();
@@ -58,14 +52,16 @@ client.on ('message', async message => {
     })
   }
 
-  else if (command === "poop"){
-    client.channels.cache.get(`816709408691847181`).send(message)
-  }
-
-  else if (command === "doge100"){
-    clearInterval(interval);
-    majdsMessage = util.argsToString(args)
-    interval = setInterval( pingDana , 10000 )
+  if (command === "bulkimage" || command === "bulkimg" || command === "bulk"){
+    const newArgs = util.argsToString(args)
+    console.log(newArgs)
+    axios.get(`https://serpapi.com/search.json?q=${newArgs}&tbm=isch&ijn=0&api_key=5459d92ee4ce2ff76f664e28e3e146210636c76ec2676e23d74424d4a62b6b0f`)
+    .then(res => {
+      const length = res.data['suggested_searches'].length
+      for (let i = 0; i < 5; i++){
+        message.channel.send(res.data['suggested_searches'][Math.floor(Math.random()*length)]['thumbnail']);
+      }
+    })
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
@@ -100,12 +96,12 @@ client.on ('message', async message => {
     const letters = messages.last().content.toLowerCase().split("");
       var str = "";
       for (i = 0; i < letters.length; i++){
-        // const r = Math.floor(Math.random() * 2);
-        // if (r === 0){
-        //   str += letters[i];
-        // }else{
-        //   str += letters[i].toUpperCase();
-        // }
+        const r = Math.floor(Math.random() * 2);
+        if (r === 0){
+          str += letters[i];
+        }else{
+          str += letters[i].toUpperCase();
+        }
       }
       message.channel.send(str);
     })
@@ -114,8 +110,8 @@ client.on ('message', async message => {
 
   else if (command === "math" || command === "maths" || command === "eval" || command === "evaluate" || command === "compute"){
     try{
-      // const res = math.evaluate(util.argsToString(args));
-      // message.channel.send(res);
+      const res = math.evaluate(util.argsToString(args));
+      message.channel.send(res);
     }catch(error){
       message.channel.send(error.message);
     }
@@ -171,6 +167,7 @@ client.on ('message', async message => {
   }
 
   else if (command === "timer" || command === "time" || command === "remind" || command === "reminder"){
+    return message.channel.send("This command has been disabled cuz Heroku fricken restarts every 24 hours for some dumbass reason so the memory gets whiped and I dont feel like storing timers in a databse right now cuz im lazy :weary:")
     if (args.length < 1) {
       message.channel.send("Invalid command. To set a timer use the following command: *" + prefix + "timer 5 min*");
       return;
