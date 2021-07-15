@@ -53,15 +53,21 @@ client.on ('message', async message => {
   }
 
   if (command === "bulkimage" || command === "bulkimg" || command === "bulk"){
-    const newArgs = util.argsToString(args)
-    console.log(newArgs)
-    axios.get(`https://serpapi.com/search.json?q=${newArgs}&tbm=isch&ijn=0&api_key=5459d92ee4ce2ff76f664e28e3e146210636c76ec2676e23d74424d4a62b6b0f`)
-    .then(res => {
-      const length = res.data['suggested_searches'].length
-      for (let i = 0; i < 5; i++){
-        message.channel.send(res.data['suggested_searches'][Math.floor(Math.random()*length)]['thumbnail']);
-      }
-    })
+    console.log("here")
+    for (let i = 0; i < 5; i++){
+      util.getImage(util.argsToString(args), url => {
+        message.channel.send(url)
+      })
+    }
+    // const newArgs = util.argsToString(args)
+    // console.log(newArgs)
+    // axios.get(`https://serpapi.com/search.json?q=${newArgs}&tbm=isch&ijn=0&api_key=5459d92ee4ce2ff76f664e28e3e146210636c76ec2676e23d74424d4a62b6b0f`)
+    // .then(res => {
+    //   const length = res.data['suggested_searches'].length
+    //   for (let i = 0; i < 5; i++){
+    //     message.channel.send(res.data['suggested_searches'][Math.floor(Math.random()*length)]['thumbnail']);
+    //   }
+    // })
   }
 
   else if (command === "reportacademicoffense" || command === "reportacademicoffence"){
